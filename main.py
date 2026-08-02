@@ -125,7 +125,17 @@ window.setCentralWidget(container)
 
 
 def open_site():
-    browser.setUrl(QUrl(address_bar.text()))
+    text = address_bar.text().strip()
+
+    if "://" in text:
+        url = QUrl(text)
+    elif "." in text and " " not in text:
+        url = QUrl("http://" + text)
+    else:
+        return
+
+    browser.setUrl(url)
+
 def loading_started():
     loading_icon.setMovie(movie)
     movie.start()

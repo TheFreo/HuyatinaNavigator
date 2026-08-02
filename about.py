@@ -25,7 +25,8 @@ def show_about(parent):
     info_layout = QVBoxLayout()
     info_tab.setLayout(info_layout)
 
-    pixmap = QPixmap("assets/images/logo.png")
+    from resource_path import resource_path
+    pixmap = QPixmap(resource_path("assets/images/logo.png"))
 
     image = QLabel()
     image.setPixmap(
@@ -40,7 +41,7 @@ def show_about(parent):
     info = QLabel("""
 <h2>Хуятина Навигатор</h2>
 
-<b>Версия:</b> Type 0.0.1 "Swedish Rhapsody"<br>
+<b>Версия:</b> Type 0.0.2 "Gongs or Chimes"<br>
 <b>Создал:</b> honolula<br>
 <b>Создан:</b> 2026<br>
 <b>E-mail:</b> honolula@tutanota.de

@@ -20,19 +20,22 @@ from PySide6.QtWidgets import (
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QMovie
+from PySide6.QtCore import QSize
 from about import show_about
+from resource_path import resource_path
 
 # ==============================
 # Константы браузера
 
 
 HOME_PAGE = "https://google.com"
-with open("settings.json", "r", encoding="utf-8") as file:
-    settings = json.load(file)
+with open(resource_path("settings.json"), "r", encoding="utf-8") as f:
+    settings = json.load(f)
 
 HOME_PAGE = settings["home_page"]
 def save_settings():
-    with open("settings.json", "w", encoding="utf-8") as file:
+    with open(resource_path("settings.json"), "w", encoding="utf-8") as file:
         json.dump(
             settings,
             file,
@@ -59,6 +62,16 @@ window.resize(1200, 800)
 
 
 browser = QWebEngineView()
+
+profile = browser.page().profile()
+
+profile.setHttpUserAgent(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "HuyatinaNavigator/0.0.2 "
+    "Chrome/136.0.7103.114 Safari/537.36"
+)
+
 browser.setUrl(QUrl(HOME_PAGE))
 
 # ==============================
@@ -67,6 +80,17 @@ browser.setUrl(QUrl(HOME_PAGE))
 
 address_bar = QLineEdit()
 address_bar.setPlaceholderText("Пойти на...")
+
+loading_icon = QLabel()
+
+movie = QMovie(resource_path("assets/images/loading.gif"))
+loading_icon.setMovie(movie)
+
+idle_pixmap = QPixmap(resource_path("assets/images/loading.png"))
+loading_icon.setPixmap(idle_pixmap)
+
+loading_icon.setPixmap(idle_pixmap)
+loading_icon.resize(idle_pixmap.size())
 
 back_button = QPushButton("←")
 forward_button = QPushButton("→")
@@ -79,6 +103,7 @@ top_bar.addWidget(back_button)
 top_bar.addWidget(forward_button)
 top_bar.addWidget(reload_button)
 top_bar.addWidget(home_button)
+top_bar.addWidget(loading_icon)
 top_bar.addWidget(address_bar)
 top_bar.addWidget(go_button)
 
@@ -101,7 +126,14 @@ window.setCentralWidget(container)
 
 def open_site():
     browser.setUrl(QUrl(address_bar.text()))
+def loading_started():
+    loading_icon.setMovie(movie)
+    movie.start()
 
+
+def loading_finished(ok):
+    movie.stop()
+    loading_icon.setPixmap(idle_pixmap)
 go_button.clicked.connect(open_site)
 
 back_button.clicked.connect(browser.back)
@@ -117,6 +149,9 @@ address_bar.returnPressed.connect(open_site)
 browser.urlChanged.connect(
     lambda url: address_bar.setText(url.toString())
 )
+
+browser.loadStarted.connect(loading_started)
+browser.loadFinished.connect(loading_finished)
 
 # ==============================
 # Настройке
